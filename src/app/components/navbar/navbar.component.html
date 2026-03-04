@@ -1,0 +1,28 @@
+<nav class="navbar">
+  <a class="nav-brand" routerLink="/">
+    <div class="logo-icon">🎬</div>
+    <span class="logo-text">TAKI<span class="gold">CINÉ</span></span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Accueil</a></li>
+    <li><a routerLink="/movies" routerLinkActive="active">Films</a></li>
+    <li><a routerLink="/admin" routerLinkActive="active">Admin</a></li>
+    @if (!auth.isLoggedIn) {
+      <li><a routerLink="/inscription" routerLinkActive="active">Inscription</a></li>
+    }
+    @if (auth.isLoggedIn) {
+      <li><a routerLink="/profil" routerLinkActive="active">Mon Espace</a></li>
+    }
+  </ul>
+
+  <div class="nav-actions">
+    @if (!auth.isLoggedIn) {
+      <a routerLink="/inscription" class="btn-nav btn-outline">Connexion</a>
+      <a routerLink="/inscription" class="btn-nav btn-gold">S'inscrire</a>
+    } @else {
+      <span class="user-greeting">👋 {{ auth.user()?.prenom }}</span>
+      <button class="btn-nav btn-outline" (click)="logout()">Déconnexion</button>
+    }
+  </div>
+</nav>

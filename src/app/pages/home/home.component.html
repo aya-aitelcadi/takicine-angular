@@ -1,0 +1,239 @@
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-film-strip"></div>
+
+  <!-- Hero Image -->
+  <div class="hero-image-overlay">
+    <img src="https://image.tmdb.org/t/p/original/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Cinema" class="hero-bg-img">
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-tag">🎬 Votre cinéma numérique</div>
+    <h1 class="hero-title">
+      Découvrez<br>
+      <span class="accent italic">l'art</span> du<br>
+      cinéma
+    </h1>
+    <p class="hero-subtitle">
+      Explorez, notez et gérez votre collection de films.<br>
+      Rejoignez une communauté de passionnés du 7ème art.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" routerLink="/movies">Explorer les films</button>
+      <button class="btn-secondary" routerLink="/inscription">Rejoindre</button>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-number">{{ filmService.stats.total }}</div>
+      <div class="hero-stat-label">Films</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">{{ filmService.stats.avgNote }}</div>
+      <div class="hero-stat-label">Note moy.</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">{{ filmService.stats.totalAvis }}</div>
+      <div class="hero-stat-label">Avis</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SEARCH BAR ═══ -->
+<section class="search-section">
+  <div class="search-wrapper">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher un film, un réalisateur, un genre…"
+        [value]="searchQuery()"
+        (input)="onSearch($any($event.target).value)"
+        class="search-input"
+      >
+      @if (searchQuery()) {
+        <button class="search-clear" (click)="clearSearch()">✕</button>
+      }
+    </div>
+
+    @if (showSearch()) {
+      <div class="search-results">
+        @if (searchResults().length === 0) {
+          <div class="search-empty">Aucun film trouvé pour "{{ searchQuery() }}"</div>
+        }
+        @for (film of searchResults(); track film.id) {
+          <div class="search-result-item" (click)="goToFilm(film.id)">
+            <div class="search-result-poster">
+              @if (film.image) {
+                <img [src]="film.image" [alt]="film.titre">
+              } @else {
+                <span>🎬</span>
+              }
+            </div>
+            <div class="search-result-info">
+              <div class="search-result-title">{{ film.titre }}</div>
+              <div class="search-result-meta">{{ film.realisateur }} • {{ film.genre }} • ★ {{ film.note }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ═══ TRENDING CAROUSEL ═══ -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-label">🔥 Les plus populaires</div>
+      <h2 class="section-title">Films tendance</h2>
+    </div>
+  </div>
+  <div class="carousel-wrapper">
+    <button class="carousel-btn prev" (click)="carouselPrev()">‹</button>
+    <div class="carousel-viewport">
+      <div class="carousel-track" [style.transform]="'translateX(-' + carouselOffset() * 212 + 'px)'">
+        @for (film of filmService.topFilms(); track film.id) {
+          <div class="carousel-item" (click)="goToFilm(film.id)">
+            @if (film.image) {
+              <img [src]="film.image" [alt]="film.titre" class="carousel-poster">
+            } @else {
+              <div class="carousel-placeholder">🎬</div>
+            }
+            <div class="carousel-info">
+              <div class="carousel-title">{{ film.titre }}</div>
+              <div class="carousel-meta">★ {{ film.note }} • {{ film.genre }}</div>
+            </div>
+            <div class="carousel-hover-badge">Voir →</div>
+          </div>
+        }
+      </div>
+    </div>
+    <button class="carousel-btn next" (click)="carouselNext()">›</button>
+  </div>
+</section>
+
+<!-- ═══ COUPS DE COEUR ═══ -->
+<section class="section coups-section">
+  <div class="section-header">
+    <div>
+      <div class="section-label">💛 Note ≥ 4.5</div>
+      <h2 class="section-title">Coups de cœur</h2>
+    </div>
+  </div>
+  <div class="films-row">
+    @for (film of filmService.coupsDeCoeur(); track film.id) {
+      <div class="film-card featured" (click)="goToFilm(film.id)">
+        <div class="film-poster-wrap">
+          @if (film.image) {
+            <img [src]="film.image" [alt]="film.titre" class="film-poster">
+          } @else {
+            <div class="film-poster-placeholder">🎬</div>
+          }
+          <div class="film-overlay">
+            <span class="film-overlay-btn">▶ Voir</span>
+          </div>
+          <div class="film-badge-top">⭐ {{ film.note }}</div>
+        </div>
+        <div class="film-card-body">
+          <div class="film-genre-tag">{{ genreIcons[film.genre] }} {{ film.genre }}</div>
+          <div class="film-title">{{ film.titre }}</div>
+          <div class="film-director">{{ film.realisateur }}</div>
+          <div class="film-meta">
+            <span>{{ formatDuration(film.duree) }}</span>
+            <span class="dot">·</span>
+            <span class="classif">{{ film.classification }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ═══ PAR CATÉGORIES ═══ -->
+@for (genre of allGenres; track genre) {
+  @if (filmsByGenre(genre).length > 0) {
+    <section class="section category-section">
+      <div class="section-header">
+        <div>
+          <div class="section-label">{{ genreIcons[genre] }} Catégorie</div>
+          <h2 class="section-title">{{ genre }}</h2>
+        </div>
+        <div class="section-count">{{ filmsByGenre(genre).length }} film{{ filmsByGenre(genre).length > 1 ? 's' : '' }}</div>
+      </div>
+
+      <div class="films-grid">
+        @for (film of filmsByGenre(genre).slice(0, visibleCount(genre)); track film.id) {
+          <div class="film-card" (click)="goToFilm(film.id)">
+            <div class="film-poster-wrap">
+              @if (film.image) {
+                <img [src]="film.image" [alt]="film.titre" class="film-poster">
+              } @else {
+                <div class="film-poster-placeholder">🎬</div>
+              }
+              <div class="film-overlay">
+                <span class="film-overlay-btn">▶ Voir</span>
+              </div>
+              <div class="film-badge-top">★ {{ film.note }}</div>
+            </div>
+            <div class="film-card-body">
+              <div class="film-title">{{ film.titre }}</div>
+              <div class="film-director">{{ film.realisateur }}</div>
+              <div class="film-synopsis-short">{{ film.synopsis }}</div>
+              <div class="film-meta">
+                <span>{{ formatDuration(film.duree) }}</span>
+                <span class="dot">·</span>
+                <span class="classif">{{ film.classification }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (hasMore(genre)) {
+        <div style="text-align:center; margin-top: 1.5rem;">
+          <button class="btn-load-more" (click)="loadMore(genre)">
+            ⬇ Charger plus de films {{ genre }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+}
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">TAKI<span>CINÉ</span></div>
+      <p>Votre plateforme cinéma préférée. Découvrez, notez et partagez vos films.</p>
+      <div class="footer-social">
+        <a class="social-btn">f</a>
+        <a class="social-btn">𝕏</a>
+        <a class="social-btn">📷</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Paris</h4>
+      <ul><li>Beaugrenelle</li><li>Champs-Élysées</li><li>La Vilette</li></ul>
+    </div>
+    <div class="footer-col">
+      <h4>Lyon</h4>
+      <ul><li>Vaise</li><li>Carré de Soie</li><li>Bellecour</li></ul>
+    </div>
+    <div class="footer-col">
+      <h4>Marseille</h4>
+      <ul><li>Madeleine</li><li>Plan de campagne</li><li>La Joliette</li></ul>
+    </div>
+    <div class="footer-col">
+      <h4>Nice</h4>
+      <ul><li>Lingostière</li><li>Masséna</li><li>Gare du Sud</li></ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 TakiCiné — Tous droits réservés</p>
+    <p>Trouvez un film dans nos cinémas partenaires</p>
+  </div>
+</footer>

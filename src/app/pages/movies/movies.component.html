@@ -1,0 +1,191 @@
+<div class="page-header">
+  <div class="page-header-title">Gestion de <span>Films</span></div>
+  <div class="page-header-sub">Ajoutez, modifiez et gérez votre catalogue cinématographique</div>
+</div>
+
+<div class="toolbar">
+  <button class="btn-add" (click)="openAdd()">＋ Nouveau film</button>
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" placeholder="Rechercher…" [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)">
+  </div>
+  <div class="film-count">{{ filteredFilms.length }} film{{ filteredFilms.length !== 1 ? 's' : '' }}</div>
+</div>
+
+<div class="table-wrapper">
+  @if (filteredFilms.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🎬</div>
+      <div class="empty-title">Aucun film trouvé</div>
+      <div class="empty-sub">Essayez une autre recherche ou ajoutez un film</div>
+    </div>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Titre</th>
+          <th>Réalisateur</th>
+          <th>Date</th>
+          <th>Genre</th>
+          <th>Durée</th>
+          <th>Classification</th>
+          <th>Note</th>
+          <th>Avis</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (film of filteredFilms; track film.id) {
+          <tr>
+            <td class="td-id">{{ film.id }}</td>
+            <td class="td-title">
+              <a [routerLink]="['/film', film.id]" class="film-link">{{ film.titre }}</a>
+            </td>
+            <td>{{ film.realisateur }}</td>
+            <td>{{ formatDate(film.date) }}</td>
+            <td><span class="badge badge-blue">{{ film.genre }}</span></td>
+            <td>{{ formatDuration(film.duree) }}</td>
+            <td><span class="badge badge-gold">{{ film.classification }}</span></td>
+            <td class="td-note">★ {{ film.note }}</td>
+            <td>{{ film.avis?.length || 0 }}</td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-action btn-edit" (click)="openEdit(film)" title="Modifier">✏️</button>
+                <button class="btn-action btn-delete" (click)="openDelete(film.id)" title="Supprimer">🗑</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+<!-- ═══ FORM MODAL ═══ -->
+@if (showModal()) {
+  <div class="modal-overlay" (click.self)="closeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">{{ editingId() ? 'Modifier le film' : 'Nouveau film' }}</h3>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <form [formGroup]="filmForm">
+        <!-- Titre -->
+        <div class="form-group">
+          <label class="form-label">Titre <span class="required">*</span> <small style="color:var(--text-muted);font-weight:400">(majuscules obligatoires)</small></label>
+          <input formControlName="titre" class="form-input" placeholder="EX: TITANIC"
+            [class.ng-invalid]="f('titre')?.invalid && f('titre')?.touched">
+          @if (f('titre')?.touched && f('titre')?.errors?.['required']) {
+            <div class="form-error">Le titre est requis.</div>
+          }
+          @if (f('titre')?.touched && f('titre')?.errors?.['notUppercase']) {
+            <div class="form-error">Le titre doit être entièrement en MAJUSCULES.</div>
+          }
+        </div>
+
+        <!-- Réalisateur + Date -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Réalisateur <span class="required">*</span></label>
+            <input formControlName="realisateur" class="form-input" placeholder="James Cameron"
+              [class.ng-invalid]="f('realisateur')?.invalid && f('realisateur')?.touched">
+            @if (f('realisateur')?.touched && f('realisateur')?.errors?.['required']) {
+              <div class="form-error">Le réalisateur est requis.</div>
+            }
+            @if (f('realisateur')?.touched && f('realisateur')?.errors?.['badFormat']) {
+              <div class="form-error">Format: Prénom Nom (deux mots minimum).</div>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de sortie <span class="required">*</span></label>
+            <input formControlName="date" type="date" class="form-input"
+              [class.ng-invalid]="f('date')?.invalid && f('date')?.touched">
+            @if (f('date')?.touched && f('date')?.errors?.['required']) {
+              <div class="form-error">La date est requise.</div>
+            }
+            @if (f('date')?.touched && f('date')?.errors?.['notPast']) {
+              <div class="form-error">La date doit être antérieure à aujourd'hui.</div>
+            }
+          </div>
+        </div>
+
+        <!-- Genre + Classification + Durée -->
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Genre <span class="required">*</span></label>
+            <select formControlName="genre" class="form-input">
+              @for (g of genres; track g) {
+                <option [value]="g">{{ g }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Classification</label>
+            <select formControlName="classification" class="form-input">
+              @for (c of classifications; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Durée (min) <span class="required">*</span></label>
+            <input formControlName="duree" type="number" class="form-input" placeholder="120" min="1">
+          </div>
+        </div>
+
+        <!-- Note + Image -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Note (0–5)</label>
+            <input formControlName="note" type="number" class="form-input" min="0" max="5" step="0.1" placeholder="4.2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Affiche (URL)</label>
+            <input formControlName="image" type="url" class="form-input" placeholder="https://...">
+          </div>
+        </div>
+
+        <!-- Synopsis -->
+        <div class="form-group">
+          <label class="form-label">Synopsis <span class="required">*</span> <small style="color:var(--text-muted);font-weight:400">(min. 30 caractères)</small></label>
+          <textarea formControlName="synopsis" class="form-input" rows="4" placeholder="Décrivez le film en au moins 30 caractères…"
+            [class.ng-invalid]="f('synopsis')?.invalid && f('synopsis')?.touched"></textarea>
+          @if (f('synopsis')?.touched && f('synopsis')?.errors?.['required']) {
+            <div class="form-error">Le synopsis est requis.</div>
+          }
+          @if (f('synopsis')?.touched && f('synopsis')?.errors?.['minlength']) {
+            <div class="form-error">Minimum 30 caractères ({{ f('synopsis')?.value?.length || 0 }} actuellement).</div>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
+          <button type="button" class="btn-submit" (click)="submit()">
+            {{ editingId() ? 'Mettre à jour' : 'Ajouter le film' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ═══ DELETE CONFIRM ═══ -->
+@if (showDeleteModal()) {
+  <div class="modal-overlay" (click.self)="showDeleteModal.set(false)">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Supprimer ce film ?</h3>
+        <button class="modal-close" (click)="showDeleteModal.set(false)">✕</button>
+      </div>
+      <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:1.5rem;">
+        Cette action est irréversible. Le film sera définitivement supprimé du catalogue.
+      </p>
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="showDeleteModal.set(false)">Annuler</button>
+        <button class="btn-danger" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}

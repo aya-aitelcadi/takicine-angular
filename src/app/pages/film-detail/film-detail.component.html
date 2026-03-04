@@ -1,0 +1,217 @@
+@if (film()) {
+  <!-- ═══ HERO ═══ -->
+  <div class="detail-hero">
+    <div class="detail-hero-bg">
+      @if (film()!.image) {
+        <img [src]="film()!.image" class="detail-hero-img" alt="">
+      }
+    </div>
+    <div class="detail-hero-overlay"></div>
+
+    <div class="detail-hero-content">
+      <div class="detail-poster-wrap">
+        @if (film()!.image) {
+          <img [src]="film()!.image" [alt]="film()!.titre" class="detail-poster">
+        } @else {
+          <div class="detail-poster-placeholder">🎬</div>
+        }
+      </div>
+
+      <div class="detail-info">
+        <a routerLink="/" class="back-link">← Retour</a>
+
+        <div class="detail-genres-row">
+          <span class="badge badge-gold">{{ film()!.genre }}</span>
+          <span class="badge badge-blue">{{ film()!.classification }}</span>
+        </div>
+
+        <h1 class="detail-title">{{ film()!.titre }}</h1>
+        <div class="detail-director">Réalisé par <strong>{{ film()!.realisateur }}</strong></div>
+
+        <div class="detail-meta-row">
+          <span>📅 {{ film()!.date | date:'yyyy' }}</span>
+          <span>⏱️ {{ formatDuration(film()!.duree) }}</span>
+          <span>★ <strong>{{ film()!.note }}</strong>/5</span>
+          <span>💬 {{ film()!.avis?.length || 0 }} avis</span>
+        </div>
+
+        <div class="detail-stars">
+          @for (s of renderStarsArr(film()!.note); track s) {
+            <span class="star" [class.filled]="isFilled(s, film()!.note)">★</span>
+          }
+        </div>
+
+        <p class="detail-synopsis">{{ film()!.synopsis }}</p>
+
+        <!-- IA TOOLS -->
+        <div class="ai-tools-section">
+          <div class="ai-tools-label">🤖 Outils IA</div>
+          <div class="ai-btns">
+            <button class="ai-btn" (click)="askAI('synopsis')" [disabled]="aiLoading()">
+              🎬 Analyse du film
+            </button>
+            <button class="ai-btn" (click)="askAI('critique')" [disabled]="aiLoading()">
+              ✍️ Critique IA
+            </button>
+            <button class="ai-btn" (click)="askAI('recommande')" [disabled]="aiLoading()">
+              💡 Films similaires
+            </button>
+          </div>
+
+          @if (aiLoading()) {
+            <div class="ai-loading">
+              <div class="ai-spinner"></div>
+              <span>L'IA analyse ce film…</span>
+            </div>
+          }
+
+          @if (aiResult() && !aiLoading()) {
+            <div class="ai-result-card">
+              <div class="ai-result-header">{{ aiModeLabel() }}</div>
+              <div class="ai-result-text" [innerHTML]="formatAiResult(aiResult())"></div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AVIS SECTION ═══ -->
+  <section class="avis-section">
+    <div class="avis-container">
+
+      <!-- Add review form -->
+      <div class="avis-form-card">
+        <h3 class="avis-form-title">💬 Laisser un avis</h3>
+        @if (!auth.isLoggedIn) {
+          <div class="avis-login-prompt">
+            <span>Vous devez être connecté pour laisser un avis.</span>
+            <a routerLink="/inscription" class="btn-primary" style="font-size:0.8rem;padding:0.5rem 1rem;">Se connecter</a>
+          </div>
+        } @else {
+          <div class="star-selector">
+            <span class="star-selector-label">Votre note :</span>
+            @for (s of [1,2,3,4,5]; track s) {
+              <span
+                class="star-select"
+                [class.active]="s <= (hoveredStar() || selectedStar())"
+                (mouseenter)="hoveredStar.set(s)"
+                (mouseleave)="hoveredStar.set(0)"
+                (click)="selectedStar.set(s)"
+              >★</span>
+            }
+            @if (selectedStar() > 0) {
+              <span class="star-count">{{ selectedStar() }}/5</span>
+            }
+          </div>
+
+          <div class="form-group" style="margin-top:1rem">
+            <label class="form-label">Votre commentaire</label>
+            <textarea
+              class="form-input"
+              [class.error]="avisForm.get('commentaire')?.invalid && avisForm.get('commentaire')?.touched"
+              placeholder="Minimum 10 caractères…"
+              rows="3"
+              [formControl]="$any(avisForm.get('commentaire'))"
+            ></textarea>
+            @if (avisForm.get('commentaire')?.invalid && avisForm.get('commentaire')?.touched) {
+              <div class="form-error">Minimum 10 caractères requis.</div>
+            }
+          </div>
+          <button class="btn-primary" (click)="submitAvis()">Publier mon avis</button>
+        }
+      </div>
+
+      <!-- Reviews list -->
+      <div class="avis-list">
+        <h3 class="avis-list-title">⭐ Avis des spectateurs ({{ film()!.avis?.length || 0 }})</h3>
+
+        @if (!film()!.avis?.length) {
+          <div class="empty-state">
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">Aucun avis pour le moment</div>
+            <div class="empty-sub">Soyez le premier à donner votre avis !</div>
+          </div>
+        }
+
+        @for (avis of film()!.avis; track avis.id) {
+          <div class="avis-card" [class.mine]="isMyAvis(avis)">
+            <div class="avis-header">
+              <div class="avis-avatar">{{ avis.auteur[0] }}</div>
+              <div class="avis-meta">
+                <div class="avis-author">
+                  {{ avis.auteur }}
+                  @if (isMyAvis(avis)) {
+                    <span class="my-badge">Moi</span>
+                  }
+                </div>
+                <div class="avis-date">{{ avis.date | date:'dd/MM/yyyy' }}</div>
+              </div>
+              <div class="avis-stars">
+                @for (s of [1,2,3,4,5]; track s) {
+                  <span class="star" [class.filled]="s <= avis.note">★</span>
+                }
+              </div>
+            </div>
+
+            @if (editingAvisId() === avis.id) {
+              <div class="edit-form">
+                <textarea
+                  class="form-input"
+                  rows="3"
+                  [formControl]="$any(editForm.get('commentaire'))"
+                ></textarea>
+                <div class="edit-actions">
+                  <button class="btn-submit" (click)="saveEdit(film()!.id)">Sauvegarder</button>
+                  <button class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+                </div>
+              </div>
+            } @else {
+              <p class="avis-text">{{ avis.commentaire }}</p>
+            }
+
+            @if (isMyAvis(avis) && editingAvisId() !== avis.id) {
+              <div class="avis-actions">
+                <button class="avis-btn edit" (click)="startEdit(avis)">✏️ Modifier</button>
+                <button class="avis-btn delete" (click)="deleteAvis(film()!.id, avis.id)">🗑️ Supprimer</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FILMS SIMILAIRES ═══ -->
+  @if (similarFilms().length > 0) {
+    <section class="similar-section">
+      <div class="section-header" style="padding: 0 0 2rem;">
+        <div>
+          <div class="section-label">🎬 Vous aimerez aussi</div>
+          <h2 class="section-title">Films similaires — {{ film()!.genre }}</h2>
+        </div>
+      </div>
+      <div class="similar-grid">
+        @for (f of similarFilms(); track f.id) {
+          <a class="similar-card" [routerLink]="['/film', f.id]">
+            @if (f.image) {
+              <img [src]="f.image" [alt]="f.titre" class="similar-poster">
+            } @else {
+              <div class="similar-placeholder">🎬</div>
+            }
+            <div class="similar-info">
+              <div class="similar-title">{{ f.titre }}</div>
+              <div class="similar-note">★ {{ f.note }}</div>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+} @else {
+  <div class="empty-state" style="padding: 8rem 2rem;">
+    <div class="empty-icon">🎬</div>
+    <div class="empty-title">Film introuvable</div>
+    <a routerLink="/" class="btn-primary" style="margin-top:1rem">Retour à l'accueil</a>
+  </div>
+}

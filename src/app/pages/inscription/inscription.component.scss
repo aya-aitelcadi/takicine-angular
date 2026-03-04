@@ -1,0 +1,61 @@
+.auth-layout {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(245,197,24,0.05) 0%, transparent 60%),
+    var(--noir);
+}
+
+.auth-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow);
+}
+
+.auth-brand {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 2rem;
+  letter-spacing: 3px;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  span { color: var(--gold); }
+}
+
+.auth-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 0.3rem;
+}
+
+.auth-sub {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.full { width: 100%; justify-content: center; margin-top: 0.5rem; }
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+
+  a {
+    color: var(--gold);
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 0.25rem;
+    &:hover { text-decoration: underline; }
+  }
+}

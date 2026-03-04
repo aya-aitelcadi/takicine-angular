@@ -1,0 +1,110 @@
+@if (!auth.isLoggedIn) {
+  <div class="empty-state" style="padding: 6rem 2rem;">
+    <div class="empty-icon">🔒</div>
+    <div class="empty-title">Accès réservé</div>
+    <div class="empty-sub">Connectez-vous pour accéder à votre espace personnel.</div>
+    <a routerLink="/inscription" class="btn-primary" style="margin-top:1.5rem">Se connecter</a>
+  </div>
+} @else {
+  <div class="profil-layout">
+    <!-- Header Card -->
+    <div class="profil-header-card">
+      <div class="profil-avatar">{{ initials }}</div>
+      <div class="profil-info">
+        <h2>{{ auth.user()?.prenom }} {{ auth.user()?.nom }}</h2>
+        <p>{{ auth.user()?.email }}</p>
+        <span class="badge badge-gold">⭐ Membre actif</span>
+      </div>
+      <div class="profil-header-actions">
+        <button class="btn-primary" style="font-size:0.8rem;padding:0.6rem 1.1rem" (click)="openEdit()">Modifier mes infos</button>
+        <button class="btn-secondary" style="font-size:0.8rem;padding:0.6rem 1.1rem" (click)="logout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profil-tabs">
+      <button class="tab-btn" [class.active]="activeTab() === 'infos'" (click)="activeTab.set('infos')">Mes informations</button>
+      <button class="tab-btn" [class.active]="activeTab() === 'points'" (click)="activeTab.set('points')">Points fidélité</button>
+    </div>
+
+    @if (activeTab() === 'infos') {
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Prénom</div>
+          <div class="info-value">{{ auth.user()?.prenom }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Nom</div>
+          <div class="info-value">{{ auth.user()?.nom || '—' }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Âge</div>
+          <div class="info-value">{{ auth.user()?.age || '—' }} ans</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Email</div>
+          <div class="info-value">{{ auth.user()?.email }}</div>
+        </div>
+      </div>
+
+      <div class="profil-actions-row">
+        <button class="btn-secondary" style="font-size:0.85rem">📝 Nouvel avis</button>
+        <button class="btn-secondary" style="font-size:0.85rem">✏️ Modifier mes avis</button>
+      </div>
+    }
+
+    @if (activeTab() === 'points') {
+      <div class="points-section">
+        <div class="points-card">
+          <div class="points-number">{{ auth.user()?.points }}</div>
+          <div class="points-label">Points fidélité</div>
+        </div>
+        <p class="points-info">
+          Gagnez <strong>+10 points</strong> par avis publié. Échangez vos points contre des réductions sur vos billets dans nos cinémas partenaires.
+        </p>
+        <div class="points-levels">
+          <div class="level" [class.active]="(auth.user()?.points || 0) >= 0">🥉 Bronze — 0 pts</div>
+          <div class="level" [class.active]="(auth.user()?.points || 0) >= 50">🥈 Silver — 50 pts</div>
+          <div class="level" [class.active]="(auth.user()?.points || 0) >= 150">🥇 Gold — 150 pts</div>
+          <div class="level" [class.active]="(auth.user()?.points || 0) >= 300">💎 Diamond — 300 pts</div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Edit Modal -->
+  @if (showEditModal()) {
+    <div class="modal-overlay" (click.self)="showEditModal.set(false)">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Modifier mon profil</h3>
+          <button class="modal-close" (click)="showEditModal.set(false)">✕</button>
+        </div>
+        <form [formGroup]="editForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Prénom</label>
+              <input formControlName="prenom" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nom</label>
+              <input formControlName="nom" class="form-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Âge</label>
+            <input formControlName="age" type="number" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input formControlName="email" type="email" class="form-input">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="showEditModal.set(false)">Annuler</button>
+            <button type="button" class="btn-submit" (click)="saveEdit()">Sauvegarder</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+}

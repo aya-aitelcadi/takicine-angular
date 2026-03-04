@@ -1,0 +1,86 @@
+<div class="page-header">
+  <div class="page-header-title">Panel <span>Admin</span></div>
+  <div class="page-header-sub">Vue d'ensemble de la plateforme TakiCiné</div>
+</div>
+
+<div class="admin-layout">
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-icon">🎬</span>
+      <div>
+        <div class="stat-label">Films</div>
+        <div class="stat-value">{{ stats.total }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <div>
+        <div class="stat-label">Utilisateurs</div>
+        <div class="stat-value">23</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">💬</span>
+      <div>
+        <div class="stat-label">Avis total</div>
+        <div class="stat-value">{{ stats.totalAvis }}</div>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <span class="stat-icon">⭐</span>
+      <div>
+        <div class="stat-label">Note moyenne</div>
+        <div class="stat-value">{{ stats.avgNote }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <a routerLink="/movies" class="action-btn primary">🎬 Gérer les films</a>
+    <button class="action-btn outline">👥 Utilisateurs</button>
+    <button class="action-btn outline">💬 Avis</button>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-title">📊 Notes par film</div>
+      <canvas id="chart-notes"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🎭 Répartition par genre</div>
+      <canvas id="chart-genres"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">💬 Avis par film</div>
+      <canvas id="chart-avis"></canvas>
+    </div>
+  </div>
+
+  <!-- Films table preview -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3>Derniers films ajoutés</h3>
+      <a routerLink="/movies" class="see-all">Voir tout →</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Titre</th><th>Genre</th><th>Note</th><th>Avis</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of films.slice(-5).reverse(); track f.id) {
+          <tr>
+            <td class="td-title">{{ f.titre }}</td>
+            <td><span class="badge badge-blue">{{ f.genre }}</span></td>
+            <td class="td-note">★ {{ f.note }}</td>
+            <td>{{ f.avis?.length || 0 }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

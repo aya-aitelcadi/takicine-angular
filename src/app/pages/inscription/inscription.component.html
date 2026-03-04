@@ -1,0 +1,87 @@
+<div class="auth-layout">
+  <div class="auth-card">
+    <div class="auth-brand">TAKI<span>CINÉ</span></div>
+
+    @if (mode() === 'signup') {
+      <h2 class="auth-title">Rejoindre la communauté</h2>
+      <p class="auth-sub">Créez votre compte et découvrez le cinéma autrement.</p>
+
+      <form [formGroup]="signupForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Prénom <span class="required">*</span></label>
+            <input formControlName="prenom" class="form-input" placeholder="Marie">
+            @if (sf('prenom')?.touched && sf('prenom')?.invalid) {
+              <div class="form-error">Prénom requis (2 caractères min.)</div>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom <span class="required">*</span></label>
+            <input formControlName="nom" class="form-input" placeholder="Dupont">
+            @if (sf('nom')?.touched && sf('nom')?.invalid) {
+              <div class="form-error">Nom requis.</div>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Âge</label>
+          <input formControlName="age" type="number" class="form-input" placeholder="25">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email <span class="required">*</span></label>
+          <input formControlName="email" type="email" class="form-input" placeholder="marie@exemple.fr">
+          @if (sf('email')?.touched && sf('email')?.invalid) {
+            <div class="form-error">Email invalide.</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe <span class="required">*</span></label>
+          <input formControlName="password" type="password" class="form-input" placeholder="6 caractères minimum">
+          @if (sf('password')?.touched && sf('password')?.invalid) {
+            <div class="form-error">Mot de passe : 6 caractères minimum.</div>
+          }
+        </div>
+
+        <button type="button" class="btn-primary full" (click)="submitSignup()">
+          Créer mon compte
+        </button>
+      </form>
+
+      <div class="auth-switch">
+        Déjà membre ?
+        <a (click)="toggleMode()">Se connecter</a>
+      </div>
+
+    } @else {
+      <h2 class="auth-title">Bon retour !</h2>
+      <p class="auth-sub">Connectez-vous à votre compte TakiCiné.</p>
+
+      <form [formGroup]="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email <span class="required">*</span></label>
+          <input formControlName="email" type="email" class="form-input" placeholder="votre@email.fr">
+          @if (lf('email')?.touched && lf('email')?.invalid) {
+            <div class="form-error">Email invalide.</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe <span class="required">*</span></label>
+          <input formControlName="password" type="password" class="form-input" placeholder="••••••••">
+        </div>
+
+        <button type="button" class="btn-primary full" (click)="submitLogin()">
+          Se connecter
+        </button>
+      </form>
+
+      <div class="auth-switch">
+        Pas encore membre ?
+        <a (click)="toggleMode()">S'inscrire</a>
+      </div>
+    }
+  </div>
+</div>

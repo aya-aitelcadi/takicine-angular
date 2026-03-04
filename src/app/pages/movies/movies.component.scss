@@ -1,0 +1,123 @@
+.toolbar {
+  padding: 1.5rem 4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--noir-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.btn-add {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--gold);
+  color: var(--noir);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  &:hover { background: var(--gold-light); transform: translateY(-1px); }
+}
+
+.search-box {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--noir-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  transition: border-color 0.2s;
+  &:focus-within { border-color: var(--gold); }
+
+  input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    &::placeholder { color: var(--text-muted); }
+  }
+}
+
+.film-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.table-wrapper {
+  padding: 2rem 4rem 4rem;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead tr { border-bottom: 2px solid var(--border); }
+
+th {
+  text-align: left;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.2s;
+  &:hover { background: rgba(245,197,24,0.025); }
+}
+
+td {
+  padding: 0.875rem;
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.td-id { color: var(--text-muted); font-size: 0.75rem; }
+
+.td-title { font-weight: 600; color: var(--text-primary); }
+
+.td-note { color: var(--gold); font-weight: 700; }
+
+.film-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+  &:hover { color: var(--gold); }
+}
+
+.action-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.btn-delete { background: rgba(230,57,70,0.1); color: var(--accent-red); &:hover { background: rgba(230,57,70,0.25); transform: scale(1.1); } }
+.btn-edit { background: rgba(245,197,24,0.1); color: var(--gold); &:hover { background: rgba(245,197,24,0.25); transform: scale(1.1); } }
