@@ -151,21 +151,24 @@ export class FilmDetailComponent implements OnInit {
     };
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('http://localhost:3000/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompts[mode] }]
-        })
+        body: JSON.stringify({ prompt: prompts[mode] })
       });
+
       const data = await response.json();
-      const text = data.content?.map((c: any) => c.text || '').join('') || 'Erreur lors de la génération.';
-      this.aiResult.set(text);
-    } catch {
-      this.aiResult.set('Impossible de contacter l\'IA. Vérifiez votre connexion.');
-    } finally {
+
+      if (!response.ok) {
+        console.error('AI error:', data);
+        throw new Error(data?.error || 'AI_ERROR');
+      }
+
+      this.aiResult.set(data.text || 'Erreur lors de la génération.');
+    } catch (e) {
+        this.aiResult.set('Impossible de contacter l’IA. Vérifiez que le serveur IA tourne (node index.js).');
+        console.error(e);
+    }finally {
       this.aiLoading.set(false);
     }
   }

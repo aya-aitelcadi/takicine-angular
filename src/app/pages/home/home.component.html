@@ -57,6 +57,23 @@
         <button class="search-clear" (click)="clearSearch()">✕</button>
       }
     </div>
+    <!-- 🔎 Recherche intelligente IA -->
+    <div class="search-bar ai-search">
+      <span class="search-icon">🤖</span>
+
+      <input
+        type="text"
+        placeholder="Recherche intelligente (ex: film romantique triste)"
+        [value]="aiQuery()"
+        (input)="aiQuery.set($any($event.target).value)"
+        class="search-input"
+      >
+
+      <button class="btn-primary" (click)="aiSearch()" [disabled]="aiSearching()">
+        {{ aiSearching() ? 'Analyse...' : 'Recherche IA' }}
+      </button>
+    </div>
+     
 
     @if (showSearch()) {
       <div class="search-results">
@@ -75,6 +92,32 @@
             <div class="search-result-info">
               <div class="search-result-title">{{ film.titre }}</div>
               <div class="search-result-meta">{{ film.realisateur }} • {{ film.genre }} • ★ {{ film.note }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @if (useAiSearch()) {
+      <div class="search-results">
+        @if (aiResults().length === 0 && !aiSearching()) {
+          <div class="search-empty">Aucun film trouvé avec l'IA</div>
+        }
+
+        @for (film of aiResults(); track film.id) {
+          <div class="search-result-item" (click)="goToFilm(film.id)">
+            <div class="search-result-poster">
+              @if (film.image) {
+               <img [src]="film.image" [alt]="film.titre">
+              } @else {
+                <span>🎬</span>
+              }
+            </div>
+
+            <div class="search-result-info">
+              <div class="search-result-title">{{ film.titre }}</div>
+              <div class="search-result-meta">
+               {{ film.realisateur }} • {{ film.genre }} • ★ {{ film.note }}
+              </div>
             </div>
           </div>
         }

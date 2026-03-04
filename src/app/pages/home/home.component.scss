@@ -149,7 +149,11 @@
     box-shadow: 0 0 0 3px rgba(245,197,24,0.1);
   }
 }
-
+.ai-search{
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
 .search-icon { font-size: 1rem; opacity: 0.5; }
 
 .search-input {

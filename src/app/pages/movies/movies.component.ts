@@ -36,6 +36,10 @@ export class MoviesComponent {
   fb = inject(FormBuilder);
 
   searchQuery = signal('');
+  aiQuery = signal('');
+  aiSearching = signal(false);
+  useAiSearch = signal(false);
+  aiResults = signal<Film[]>([]);
   showModal = signal(false);
   showDeleteModal = signal(false);
   editingId = signal<number | null>(null);
@@ -62,6 +66,12 @@ export class MoviesComponent {
   });
 
   get filteredFilms(): Film[] {
+    // Si mode IA activé : on affiche les résultats IA
+    if (this.useAiSearch()) {
+      return this.aiResults();
+    }
+
+    // Sinon : recherche normale actuelle
     const q = this.searchQuery().toLowerCase();
     if (!q) return this.filmService.films();
     return this.filmService.searchFilms(q);
@@ -125,4 +135,62 @@ export class MoviesComponent {
   formatDuration(min: number): string {
     return `${Math.floor(min/60)}h${(min%60).toString().padStart(2,'0')}`;
   }
+
+  disableAiSearch(): void {
+    this.useAiSearch.set(false);
+    this.aiResults.set([]);
+    this.aiQuery.set('');
+  }
+
+  async aiSearch(): Promise<void> {
+    const q = this.aiQuery().trim();
+    if (!q) {
+      this.toast.show('warning', 'Tape une recherche IA.', '⚠️');
+      return;
+    }
+
+  this.aiSearching.set(true);
+  this.useAiSearch.set(true);
+
+  try {
+    const catalog = this.filmService.films().map(f => ({
+      id: f.id,
+      titre: f.titre,
+      genre: f.genre,
+      realisateur: f.realisateur,
+      date: f.date,
+      note: f.note,
+      synopsis: f.synopsis,
+      classification: f.classification,
+      duree: f.duree
+    }));
+
+    const r = await fetch('http://localhost:3000/api/ai-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q, catalog })
+    });
+
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || 'AI_SEARCH_ERROR');
+
+    const ids: number[] = data.ids || [];
+    const results = ids
+      .map(id => this.filmService.getById(id))
+      .filter(Boolean) as Film[];
+
+    this.aiResults.set(results);
+
+    if (results.length === 0) {
+      this.toast.show('info', 'Aucun résultat IA. Essaie une autre requête.', '🤖');
+    }
+  } catch (e) {
+    console.error(e);
+    this.toast.show('warning', 'Recherche IA indisponible. Retour à la recherche normale.', '⚠️');
+    this.disableAiSearch();
+  } finally {
+    this.aiSearching.set(false);
+  }
+}
+
 }

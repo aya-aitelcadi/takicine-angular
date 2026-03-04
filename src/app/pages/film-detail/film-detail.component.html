@@ -61,13 +61,17 @@
           @if (aiLoading()) {
             <div class="ai-loading">
               <div class="ai-spinner"></div>
-              <span>L'IA analyse ce film…</span>
+              <span>🤖 L’IA analyse ce film et prépare une réponse…</span>
             </div>
           }
 
           @if (aiResult() && !aiLoading()) {
             <div class="ai-result-card">
-              <div class="ai-result-header">{{ aiModeLabel() }}</div>
+              <div class="ai-result-header">
+                {{ aiModeLabel() }}
+                <span class="ai-badge">🤖 Généré par IA</span>
+              </div>
+
               <div class="ai-result-text" [innerHTML]="formatAiResult(aiResult())"></div>
             </div>
           }

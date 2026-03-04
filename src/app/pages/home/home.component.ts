@@ -19,6 +19,10 @@ export class HomeComponent {
   searchResults = signal<Film[]>([]);
   showSearch = signal(false);
   carouselOffset = signal(0);
+  aiQuery = signal('');
+  aiSearching = signal(false);
+  aiResults = signal<Film[]>([]);
+  useAiSearch = signal(false);
 
   // Load more per genre
   genreVisible: Record<string, number> = {};
@@ -90,4 +94,55 @@ export class HomeComponent {
   formatDuration(min: number): string {
     return `${Math.floor(min/60)}h${(min%60).toString().padStart(2,'0')}`;
   }
+
+
+
+
+  async aiSearch(): Promise<void> {
+    const q = this.aiQuery().trim();
+    if (!q) return;
+
+    this.aiSearching.set(true);
+    this.useAiSearch.set(true);
+
+    try {
+      const catalog = this.filmService.films().map(f => ({
+        id: f.id,
+        titre: f.titre,
+        genre: f.genre,
+        realisateur: f.realisateur,
+        date: f.date,
+        note: f.note,
+        synopsis: f.synopsis
+      }));
+
+      const r = await fetch('http://localhost:3000/api/ai-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q, catalog })
+      });
+
+      const data = await r.json();
+
+      const ids: number[] = data.ids || [];
+      const results = ids
+        .map(id => this.filmService.getById(id))
+        .filter(Boolean) as Film[];
+
+      this.aiResults.set(results);
+
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.aiSearching.set(false);
+    }
+  }
+  disableAiSearch(): void {
+    this.useAiSearch.set(false);
+    this.aiResults.set([]);
+  }
+
+
+  
+
 }

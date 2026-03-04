@@ -12,6 +12,26 @@
   <div class="film-count">{{ filteredFilms.length }} film{{ filteredFilms.length !== 1 ? 's' : '' }}</div>
 </div>
 
+
+<div class="search-box ai">
+  <span>🤖</span>
+  <input
+    type="text"
+    placeholder="Recherche IA (ex: 'films dans l’espace', 'voyage dans le temps')"
+    [value]="aiQuery()"
+    (input)="aiQuery.set($any($event.target).value)"
+    [disabled]="aiSearching()"
+  />
+  <button class="btn-ai" (click)="aiSearch()" [disabled]="aiSearching()">
+    {{ aiSearching() ? '...' : 'IA' }}
+  </button>
+
+  @if (useAiSearch()) {
+    <button class="btn-ai-cancel" (click)="disableAiSearch()">✕</button>
+  }
+</div>
+
+
 <div class="table-wrapper">
   @if (filteredFilms.length === 0) {
     <div class="empty-state">
